@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "messages": [
+    {
+      "type": "message",
+      "user": "U012AB3CDE",
+      "text": "012345",
+      "reactions": [
+          {
+              "name": "rocket",
+              "count": 1,
+              "users": ["U061F7AUR"]
+          }
+      ],
+      "ts": "1512085950.000216"
+    },
+    {
+      "type": "message",
+      "user": "U012AB3CDE",
+      "text": "123456",
+      "ts": "1512104434.000490"
+    },
+    {
+      "type": "message",
+      "user": "U012AB3CDE",
+      "text": "234567",
+      "ts": "1512085950.000216"
+    },
+    {
+      "type": "message",
+      "subtype": "message_deleted",
+      "hidden": true,
+      "ts": "1512085950.218404",
+      "deleted_ts": "1512085951.218404",
+      "event_ts": "1512085951.218404"
+    }
+  ],
+  "has_more": true,
+  "pin_count": 0,
+  "response_metadata": {
+    "next_cursor": "bmV4dF90czoxNTEyMDg1ODYxMDAwNTQz"
+  }
+}
