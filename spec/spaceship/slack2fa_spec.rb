@@ -20,30 +20,38 @@ RSpec.describe Spaceship::Slack2fa do
       }
     end
     let(:retry_count) { 0 }
-    let(:response_json) { File.read(File.expand_path("../support/fixtures/conversations.history.json", __dir__)) }
+    let(:slack) { instance_double(Slack::Web::Client) }
 
     before do
       Spaceship::Client.define_method(:ask_for_2fa_code) { raise NotImplementedError }
-      uri = double
-      allow(uri).to receive(:open)
-        .with("Authorization" => "Bearer SLACK_API_TOKEN")
-        .once
-        .and_return response_json
-      allow(::URI).to receive(:parse).and_call_original
-      allow(::URI).to receive(:parse)
-        .with("https://slack.com/api/conversations.history?channel=CHANNEL_ID")
-        .and_return uri
+      allow(Slack::Web::Client).to receive(:new)
+        .with(token: "SLACK_API_TOKEN")
+        .and_return slack
     end
 
-    it "retrieves 2FA code from Slack messages" do
-      expect(subject).to eq "123456"
+    context "when authenticated" do
+      before do
+        json_path = File.expand_path("../support/fixtures/conversations.history.json", __dir__)
+        json = JSON.parse(File.read(json_path))
+        allow(slack).to receive(:conversations_history)
+          .with(channel: 'CHANNEL_ID')
+          .and_return Slack::Messages::Message.new(json)
+      end
+
+      it "retrieves 2FA code from Slack messages" do
+        expect(subject).to eq "123456"
+      end
     end
 
     context "when authentication failed" do
-      let(:response_json) { File.read(File.expand_path("../support/fixtures/not_authed.json", __dir__)) }
+      before do
+        allow(slack).to receive(:conversations_history)
+          .with(channel: 'CHANNEL_ID')
+          .and_raise Slack::Web::Api::Errors::InvalidAuth.new("invalid_auth")
+      end
 
       it "raises RuntimeError" do
-        expect { subject }.to raise_error RuntimeError, starting_with("not_authed")
+        expect { subject }.to raise_error Slack::Web::Api::Errors::InvalidAuth
       end
     end
   end
