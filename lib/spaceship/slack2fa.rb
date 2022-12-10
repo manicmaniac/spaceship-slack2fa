@@ -2,6 +2,7 @@
 
 require "json"
 require "open-uri"
+require "slack"
 require "spaceship"
 require_relative "slack2fa/version"
 
@@ -48,23 +49,17 @@ module Spaceship
         code = nil
         until code || @retry_count < 0
           @retry_count -= 1
-          response = ::URI.parse("https://slack.com/api/conversations.history?channel=#{@channel_id}").open(
-            "Authorization" => "Bearer #{@slack_api_token}"
-          )
-          json = ::JSON.load(response)
-          unless json["ok"]
-            message = json.fetch("error")
-            raise "#{message}; See https://api.slack.com/methods/conversations.history for details."
+          slack = Slack::Web::Client.new(token: @slack_api_token)
+          response = slack.conversations_history(channel: @channel_id)
+          candidate_messages = response.messages.select do |message|
+            (message.type == "message" &&
+             message.user == @user_id &&
+             (message.reply_count || 0) == 0 &&
+             (message.reactions || []).empty? &&
+             (message.text || "") =~ /^\d{6}$/)
           end
-          candidate_messages = json["messages"].select do |message|
-            (message["type"] == "message" &&
-            message["user"] == @user_id &&
-            message.fetch("reply_count", 0) == 0 &&
-            message.fetch("reactions", []).empty? &&
-            message["text"] =~ /^\d{6}$/)
-          end
-          message = candidate_messages.max_by { |message| message["ts"] }
-          code = message&.fetch("text", nil)
+          message = candidate_messages.max_by(&:ts)
+          code = message&.text
           sleep(@retry_interval) unless code
         end
         code
