@@ -17,20 +17,39 @@ module Spaceship
     # @option options [Integer] :retry_count
     # @option options [Float] :retry_interval
     def self.enable(**options)
-      slack_api_token = options.fetch(:slack_api_token)
-      channel_id = options.fetch(:channel_id)
-      user_id = options.fetch(:user_id)
-      retry_count = options.fetch(:retry_count, 3)
-      retry_interval = options.fetch(:retry_interval, 20.0)
+      patch = MonkeyPatch.new(**options)
+      patch.enable
+      begin
+        yield
+      ensure
+        patch.disable
+      end
+    end
 
-      klass = Spaceship::Client
-      klass.alias_method :original_ask_for_2fa_code, :ask_for_2fa_code
-      klass.define_method(:ask_for_2fa_code) do |*_args|
+    class MonkeyPatch
+      def initialize(**options)
+        @slack_api_token = options.fetch(:slack_api_token)
+        @channel_id = options.fetch(:channel_id)
+        @user_id = options.fetch(:user_id)
+        @retry_count = options.fetch(:retry_count, 3)
+        @retry_interval = options.fetch(:retry_interval, 20.0)
+      end
+
+      def enable
+        Spaceship::Client.alias_method(:original_ask_for_2fa_code, :ask_for_2fa_code)
+        Spaceship::Client.define_method(:ask_for_2fa_code, &public_method(:retrieve_2fa_code))
+      end
+
+      def disable
+        Spaceship::Client.alias_method(:ask_for_2fa_code, :original_ask_for_2fa_code)
+      end
+
+      def retrieve_2fa_code(*_args)
         code = nil
-        until code || retry_count < 0
-          retry_count -= 1
-          response = ::URI.parse("https://slack.com/api/conversations.history?channel=#{channel_id}").open(
-            "Authorization" => "Bearer #{slack_api_token}"
+        until code || @retry_count < 0
+          @retry_count -= 1
+          response = ::URI.parse("https://slack.com/api/conversations.history?channel=#{@channel_id}").open(
+            "Authorization" => "Bearer #{@slack_api_token}"
           )
           json = ::JSON.load(response)
           unless json["ok"]
@@ -39,21 +58,16 @@ module Spaceship
           end
           candidate_messages = json["messages"].select do |message|
             (message["type"] == "message" &&
-            message["user"] == user_id &&
+            message["user"] == @user_id &&
             message.fetch("reply_count", 0) == 0 &&
             message.fetch("reactions", []).empty? &&
             message["text"] =~ /^\d{6}$/)
           end
           message = candidate_messages.max_by { |message| message["ts"] }
           code = message&.fetch("text", nil)
-          sleep(retry_interval) unless code
+          sleep(@retry_interval) unless code
         end
         code
-      end
-      begin
-        yield
-      ensure
-        klass.alias_method :ask_for_2fa_code, :original_ask_for_2fa_code
       end
     end
   end
