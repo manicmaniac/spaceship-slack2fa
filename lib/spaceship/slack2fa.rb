@@ -15,6 +15,7 @@ module Spaceship
     # @option options [String] :slack_api_token
     # @option options [String] :channel_id
     # @option options [String] :user_id
+    # @option options [String] :referrer
     # @option options [Integer] :retry_count
     # @option options [Float] :retry_interval
     def self.enable(**options)
@@ -29,9 +30,11 @@ module Spaceship
 
     class MonkeyPatch
       def initialize(**options)
-        @slack_api_token = options.fetch(:slack_api_token)
+        slack_api_token = options.fetch(:slack_api_token)
+        @slack = Slack::Web::Client.new(token: slack_api_token)
         @channel_id = options.fetch(:channel_id)
         @user_id = options.fetch(:user_id)
+        @referrer = options.fetch(:referrer)
         @retry_count = options.fetch(:retry_count, 3)
         @retry_interval = options.fetch(:retry_interval, 20.0)
       end
@@ -46,16 +49,23 @@ module Spaceship
       end
 
       def retrieve_2fa_code(*_args)
-        slack = Slack::Web::Client.new(token: @slack_api_token)
         (@retry_count + 1).times do |_i|
-          response = slack.conversations_history(channel: @channel_id)
+          response = @slack.conversations_history(channel: @channel_id)
           unused_2fa_codes = response.messages.select { |message| unused_2fa_code?(message) }
           message = unused_2fa_codes.max_by(&:ts)
           code = message&.text
-          return code if code
+          if code
+            comment_on_thread_of(message)
+            return code
+          end
 
           sleep(@retry_interval)
         end
+      end
+
+      def comment_on_thread_of(message)
+        text = "This 2FA token has been consumed by #{@referrer} using <https://github.com/manicmaniac/spaceship-slack-2fa|spaceship-slack-2fa>."
+        @slack.chat_postMessage(channel: @channel_id, text: text, thread_ts: message.ts)
       end
 
       private
