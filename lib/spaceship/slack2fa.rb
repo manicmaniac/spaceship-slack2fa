@@ -46,23 +46,26 @@ module Spaceship
       end
 
       def retrieve_2fa_code(*_args)
-        code = nil
-        until code || @retry_count < 0
-          @retry_count -= 1
-          slack = Slack::Web::Client.new(token: @slack_api_token)
+        slack = Slack::Web::Client.new(token: @slack_api_token)
+        (@retry_count + 1).times do |_i|
           response = slack.conversations_history(channel: @channel_id)
-          candidate_messages = response.messages.select do |message|
-            (message.type == "message" &&
-             message.user == @user_id &&
-             (message.reply_count || 0) == 0 &&
-             (message.reactions || []).empty? &&
-             (message.text || "") =~ /^\d{6}$/)
-          end
-          message = candidate_messages.max_by(&:ts)
+          unused_2fa_codes = response.messages.select { |message| unused_2fa_code?(message) }
+          message = unused_2fa_codes.max_by(&:ts)
           code = message&.text
-          sleep(@retry_interval) unless code
+          return code if code
+
+          sleep(@retry_interval)
         end
-        code
+      end
+
+      private
+
+      def unused_2fa_code?(message)
+        message.type == "message" &&
+          message.user == @user_id &&
+          (message.reply_count || 0) == 0 &&
+          (message.reactions || []).empty? &&
+          (message.text || "") =~ /^\d{6}$/
       end
     end
   end
