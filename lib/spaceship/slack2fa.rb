@@ -74,7 +74,7 @@ module Spaceship
 
     # @api private
     class MonkeyPatch
-      REQUIRED_SLACK_SCOPES = %w[channels.history channels.read chat.write].freeze
+      REQUIRED_SLACK_SCOPES = %w[channels.history chat.write].freeze
 
       # @option options [String] :slack_api_token    Required. A bot token for your Slack app.
       # @option options [String] :channel_id         Required. The ID of the channel where the message will be posted.

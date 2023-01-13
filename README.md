@@ -23,7 +23,7 @@ Then run `bundle install`.
 You have to create Slack app to read Slack messages beforehand.
 Please create an app from https://api.slack.com/apps that meets the following requirements.
 
-- Bot token scope with `channels:history`, `channels.read` and `chat.write` permission
+- Bot token scope with `channels.history` and `chat.write` permission
 - The bot token is enabled on the relevant channel.
 
 ## Usage
