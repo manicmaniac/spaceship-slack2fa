@@ -8,7 +8,8 @@ require 'spaceship'
 require_relative 'slack2fa/version'
 
 module Spaceship
-  # A module for applying a monkey patch to {https://rubydoc.info/gems/fastlane/Spaceship/Client Spaceship::Client} in the specific scope.
+  # A module for applying a monkey patch to {https://rubydoc.info/gems/fastlane/Spaceship/Client Spaceship::Client}
+  # in the specific scope.
   #
   # @example Simple Fastfile
   #   require "spaceship/slack2fa"
@@ -57,7 +58,8 @@ module Spaceship
   #     )
   #   end
   module Slack2fa
-    # Applies monkey patch to {https://rubydoc.info/gems/fastlane/Spaceship/Client Spaceship::Client} so that it retrieves 6-digit code from Slack.
+    # Applies monkey patch to {https://rubydoc.info/gems/fastlane/Spaceship/Client Spaceship::Client} so that it
+    # retrieves 6-digit code from Slack.
     #
     # The monkey patch is only enabled in the given block scope.
     #
@@ -80,12 +82,13 @@ module Spaceship
       # @option options [String] :slack_api_token    Required. A bot token for your Slack app.
       # @option options [String] :channel_id         Required. The ID of the channel where the message will be posted.
       # @option options [String] :user_id            Required. The ID of the user posting the message.
-      # @option options [String] :referrer           Required. A +mrkdwn+ text to identify which service consumes 6-digit code,
-      #                                              typically the name of your app.
+      # @option options [String] :referrer           Required. A +mrkdwn+ text to identify which service consumes
+      #                                              6-digit code, typically the name of your app.
       # @option options [Integer] :retry_count (3)   Optional. The number of retries to try if a message is not found.
       # @option options [Float] :retry_interval (20) Optional. The interval between retries in seconds.
       #
-      # @see https://stackoverflow.com/a/44883343/6918498 What is the simplest way to find a slack team ID and a channel ID?
+      # @see https://stackoverflow.com/a/44883343/6918498
+      #      What is the simplest way to find a slack team ID and a channel ID?
       def initialize(**options)
         slack_api_token = options.fetch(:slack_api_token)
         @slack = Slack::Web::Client.new(token: slack_api_token)
@@ -129,7 +132,8 @@ module Spaceship
       end
 
       def comment_on_thread_of(message)
-        text = "This 6-digit token has been consumed by #{@referrer} using <https://github.com/manicmaniac/spaceship-slack2fa|spaceship-slack2fa>."
+        url = 'https://github.com/manicmaniac/spaceship-slack2fa'
+        text = "This 6-digit token has been consumed by #{@referrer} using <#{url}|spaceship-slack2fa>."
         @slack.chat_postMessage(channel: @channel_id, text: text, thread_ts: message.ts)
       rescue Slack::Web::Api::Errors::MissingScope => e
         @logger.warn("#{e.full_message}Make sure your Slack app has #{REQUIRED_SLACK_SCOPES} in the scope.")
