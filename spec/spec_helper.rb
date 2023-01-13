@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require "spaceship/slack2fa"
+require "simplecov"
+
+SimpleCov.start do
+  load_profile "test_frameworks"
+  enable_coverage :branch
+end
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -13,3 +18,5 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 end
+
+require "spaceship/slack2fa"
