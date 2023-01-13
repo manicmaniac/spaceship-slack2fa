@@ -30,14 +30,18 @@ For example, if you have a Fastfile like the following:
 lane :release do
   deliver
 end
-````
+```
 
-Wrap the `deliver` action in a block that is passed to `Spaceship::Slack2fa.enable`.
+Just wrap the `deliver` action in a block that is passed to `Spaceship::Slack2fa.enable`.
+
+Note that you may need to set `SPACESHIP_2FA_SMS_DEFAULT_PHONE_NUMBER` environment variable to tell Fastlane which phone number is preferred.
 
 ```ruby
+require "spaceship/slack2fa"
+
 lane :release do
   Spaceship::Slack2fa.enable(
-    slack_api_token: "xoxb-xxxxxxxxx-xxxxxxxxx-xxxxxxxx",
+    slack_api_token: "xoxb-000000000-000000000-XXXXXXXXXXXXXXXXXXXXXXXX",
     channel_id: "CXXXXXXXXXX",
     user_id: "UXXXXXXXXXX",
     referrer: "My App",
@@ -45,19 +49,20 @@ lane :release do
     deliver
   end
 end
-````
+```
 
 I use `deliver` as an example, but any action that internally references `Spaceship::Client` can be used.
 
 You can pass options to `Spaceship::Slack2fa.enable` as arguments.
 
-- `slack_api_token`: Required. A token for the Slack app.
-- `channel_id`: Required. The id of the channel where the message will be posted (you can get this from a part of the channel's URL).
-- `user_id`: Required. The ID of the user posting the message (can be retrieved from their Slack profile).
-- `referrer`: Required. The text to identify which service consumes 2FA token, typically the name of your app. You can use `mrkdwn` format.
-- `retry_count`: Optional. The number of retries to try if a message is not found. The default is 3.
-- `retry_interval`: Optional. The interval between retries in seconds. Default is 20.0.
+- `slack_api_token`: Required. A bot token for your Slack app.
+- `channel_id`: Required. The ID of the channel where the message will be posted.
+- `user_id`: Required. The ID of the user posting the message.
+- `referrer`: Required. A `mrkdwn` text to identify which service consumes 6-digit code, typically the name of your app.
+- `retry_count`: Optional. The number of retries to try if a message is not found. The default is `3`.
+- `retry_interval`: Optional. The interval between retries in seconds. The default is `20`.
 
+See [What is the simplest way to find a slack team ID and a channel ID?](https://stackoverflow.com/a/44883343/6918498) to know how to get channel ID and user ID.
 ## How it works
 
 The `fastlane spaceship` invokes the `Spaceship::Client.ask_for_2fa_code` method to receive 2FA codes from standard input.
