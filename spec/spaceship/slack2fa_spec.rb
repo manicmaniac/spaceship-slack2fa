@@ -23,12 +23,17 @@ RSpec.describe Spaceship::Slack2fa do
     end
     let(:retry_count) { 0 }
     let(:slack) { instance_double(Slack::Web::Client) }
+    let(:log) { StringIO.new }
 
     before do
       Spaceship::Client.define_method(:ask_for_2fa_code) { raise NotImplementedError }
       allow(Slack::Web::Client).to receive(:new)
         .with(token: 'SLACK_API_TOKEN')
         .and_return slack
+      logger = Logger.new(log)
+      allow(Logger).to receive(:new)
+        .with($stderr)
+        .and_return logger
     end
 
     context 'when authenticated' do
@@ -81,12 +86,13 @@ RSpec.describe Spaceship::Slack2fa do
           .and_raise Slack::Web::Api::Errors::MissingScope.new('missing scope')
       end
 
-      it 'logs an error without raising it' do
-        expect { ask_for_2fa_code }.to output(/missing scope/).to_stderr
-        expect(slack).to have_received(:chat_postMessage)
-          .with(channel: 'CHANNEL_ID',
-                text: a_string_including('REFERRER'),
-                thread_ts: '1512104434.000490')
+      it 'retrieves 2FA code from Slack messages' do
+        expect(ask_for_2fa_code).to eq '123456'
+      end
+
+      it 'logs an error' do
+        ask_for_2fa_code
+        expect(log.string).to include 'missing scope'
       end
     end
 
