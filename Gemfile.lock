@@ -239,6 +239,8 @@ GEM
       rouge (~> 2.0.7)
     xcpretty-travis-formatter (1.0.1)
       xcpretty (~> 0.2, >= 0.0.7)
+    yard (0.9.28)
+      webrick (~> 1.7.0)
 
 PLATFORMS
   ruby
@@ -247,6 +249,7 @@ DEPENDENCIES
   rake (~> 13.0)
   rspec (~> 3.0)
   spaceship-slack2fa!
+  yard (~> 0.9)
 
 BUNDLED WITH
-   2.3.6
+   2.3.17
