@@ -15,6 +15,7 @@ RSpec.describe Spaceship::Slack2fa do
         slack_api_token: 'SLACK_API_TOKEN',
         channel_id: 'CHANNEL_ID',
         user_id: 'U012AB3CDE',
+        referrer: 'REFERRER',
         retry_count: retry_count,
         retry_interval: 0.1,
       }
@@ -34,12 +35,21 @@ RSpec.describe Spaceship::Slack2fa do
         json_path = File.expand_path("../support/fixtures/conversations.history.json", __dir__)
         json = JSON.parse(File.read(json_path))
         allow(slack).to receive(:conversations_history)
-          .with(channel: 'CHANNEL_ID')
+          .with(channel: "CHANNEL_ID")
           .and_return Slack::Messages::Message.new(json)
+        allow(slack).to receive(:chat_postMessage)
       end
 
       it "retrieves 2FA code from Slack messages" do
         expect(subject).to eq "123456"
+      end
+
+      it "posts a comment on the thread" do
+        subject
+        expect(slack).to have_received(:chat_postMessage)
+          .with(channel: "CHANNEL_ID",
+                text: a_string_including("REFERRER"),
+                thread_ts: "1512104434.000490")
       end
     end
 
