@@ -1,5 +1,9 @@
 # Spaceship::Slack2fa
 
+[![Test](https://github.com/manicmaniac/spaceship-slack2fa/actions/workflows/test.yml/badge.svg)](https://github.com/manicmaniac/spaceship-slack2fa/actions/workflows/test.yml)
+[![Maintainability](https://api.codeclimate.com/v1/badges/09d0f24cd63c448829ed/maintainability)](https://codeclimate.com/github/manicmaniac/spaceship-slack2fa/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/09d0f24cd63c448829ed/test_coverage)](https://codeclimate.com/github/manicmaniac/spaceship-slack2fa/test_coverage)
+
 This is a gem to get the 6-digit code for AppStore Connect's 2 factor auth from posts to a specific Slack channel.
 It can be used to automate deployment with actions like `fastlane deliver`.
 
