@@ -108,29 +108,31 @@ module Spaceship
       end
 
       def retrieve_2fa_code(*_args)
-        (@retry_count + 1).times do |_i|
+        with_retrying do
           response = @slack.conversations_history(channel: @channel_id)
-          unused_2fa_codes = response.messages.select { |message| unused_2fa_code?(message) }
-          message = unused_2fa_codes.max_by(&:ts)
+          message = response.messages.select { |msg| unused_2fa_code?(msg) }.max_by(&:ts)
           code = message&.text
           if code
-            begin
-              comment_on_thread_of(message)
-            rescue Slack::Web::Api::Errors::MissingScope => e
-              @logger.warn("#{e.full_message}Make sure your Slack app has #{REQUIRED_SLACK_SCOPES} in the scope.")
-            end
+            comment_on_thread_of(message)
             return code
           end
-
-          sleep(@retry_interval)
         end
       end
 
       private
 
+      def with_retrying
+        (@retry_count + 1).times do |_i|
+          yield
+          sleep(@retry_interval)
+        end
+      end
+
       def comment_on_thread_of(message)
         text = "This 6-digit token has been consumed by #{@referrer} using <https://github.com/manicmaniac/spaceship-slack2fa|spaceship-slack2fa>."
         @slack.chat_postMessage(channel: @channel_id, text: text, thread_ts: message.ts)
+      rescue Slack::Web::Api::Errors::MissingScope => e
+        @logger.warn("#{e.full_message}Make sure your Slack app has #{REQUIRED_SLACK_SCOPES} in the scope.")
       end
 
       def unused_2fa_code?(message)
