@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require "logger"
-require "json"
-require "open-uri"
-require "slack"
-require "spaceship"
-require_relative "slack2fa/version"
+require 'logger'
+require 'json'
+require 'open-uri'
+require 'slack'
+require 'spaceship'
+require_relative 'slack2fa/version'
 
 module Spaceship
   module Slack2fa
@@ -133,11 +133,11 @@ module Spaceship
       end
 
       def unused_2fa_code?(message)
-        message.type == "message" &&
+        message.type == 'message' &&
           message.user == @user_id &&
           (message.reply_count || 0) == 0 &&
           (message.reactions || []).empty? &&
-          (message.text || "") =~ /^\d{6}$/
+          (message.text || '') =~ /^\d{6}$/
       end
     end
   end
