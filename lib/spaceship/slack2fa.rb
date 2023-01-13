@@ -142,9 +142,9 @@ module Spaceship
       def unused_2fa_code?(message)
         message.type == 'message' &&
           message.user == @user_id &&
-          (message.reply_count || 0).zero? &&
-          (message.reactions || []).empty? &&
-          (message.text || '') =~ /^\d{6}$/
+          message.fetch('reply_count', 0).zero? &&
+          message.fetch('reactions', []).empty? &&
+          message.fetch('text', '') =~ /^\d{6}$/
       end
     end
   end
