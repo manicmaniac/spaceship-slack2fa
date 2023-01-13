@@ -53,10 +53,40 @@ RSpec.describe Spaceship::Slack2fa do
       end
     end
 
+    context "when channel.history is missing in scope" do
+      before do
+        allow(slack).to receive(:conversations_history)
+          .and_raise Slack::Web::Api::Errors::MissingScope.new("missing scope")
+      end
+
+      it "raises an error" do
+        expect { subject }.to raise_error Slack::Web::Api::Errors::MissingScope
+      end
+    end
+
+    context "when chat.write is missing in scope" do
+      before do
+        json_path = File.expand_path("../support/fixtures/conversations.history.json", __dir__)
+        json = JSON.parse(File.read(json_path))
+        allow(slack).to receive(:conversations_history)
+          .with(channel: "CHANNEL_ID")
+          .and_return Slack::Messages::Message.new(json)
+        allow(slack).to receive(:chat_postMessage)
+          .and_raise Slack::Web::Api::Errors::MissingScope.new("missing scope")
+      end
+
+      it "logs an error without raising it" do
+        expect { subject }.to output(/missing scope/).to_stderr
+        expect(slack).to have_received(:chat_postMessage)
+          .with(channel: "CHANNEL_ID",
+                text: a_string_including("REFERRER"),
+                thread_ts: "1512104434.000490")
+      end
+    end
+
     context "when authentication failed" do
       before do
         allow(slack).to receive(:conversations_history)
-          .with(channel: 'CHANNEL_ID')
           .and_raise Slack::Web::Api::Errors::InvalidAuth.new("invalid_auth")
       end
 

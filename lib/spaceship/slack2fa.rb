@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "logger"
 require "json"
 require "open-uri"
 require "slack"
@@ -29,6 +30,8 @@ module Spaceship
     end
 
     class MonkeyPatch
+      REQUIRED_SLACK_SCOPES = %w[channels.history channels.read chat.write].freeze
+
       def initialize(**options)
         slack_api_token = options.fetch(:slack_api_token)
         @slack = Slack::Web::Client.new(token: slack_api_token)
@@ -37,6 +40,7 @@ module Spaceship
         @referrer = options.fetch(:referrer)
         @retry_count = options.fetch(:retry_count, 3)
         @retry_interval = options.fetch(:retry_interval, 20.0)
+        @logger = Logger.new($stderr)
       end
 
       def enable
@@ -55,7 +59,11 @@ module Spaceship
           message = unused_2fa_codes.max_by(&:ts)
           code = message&.text
           if code
-            comment_on_thread_of(message)
+            begin
+              comment_on_thread_of(message)
+            rescue Slack::Web::Api::Errors::MissingScope => e
+              @logger.warn("#{e.full_message}Make sure your Slack app has #{REQUIRED_SLACK_SCOPES} in the scope.")
+            end
             return code
           end
 
