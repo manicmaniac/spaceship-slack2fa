@@ -7,9 +7,10 @@ RSpec.describe Spaceship::Slack2fa do
 
   describe ".enable" do
     subject do
-      described_class.enable(**options) { Spaceship::TunesClient.new.ask_for_2fa_code }
+      described_class.enable(**options) { client.ask_for_2fa_code }
     end
 
+    let(:client) { Spaceship::TunesClient.new }
     let(:options) do
       {
         slack_api_token: 'SLACK_API_TOKEN',
@@ -50,6 +51,11 @@ RSpec.describe Spaceship::Slack2fa do
           .with(channel: "CHANNEL_ID",
                 text: a_string_including("REFERRER"),
                 thread_ts: "1512104434.000490")
+      end
+
+      it "removes temporary method" do
+        subject
+        expect(client).not_to respond_to :original_ask_for_2fa_code
       end
     end
 

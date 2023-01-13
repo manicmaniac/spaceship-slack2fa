@@ -103,6 +103,7 @@ module Spaceship
 
       def disable
         Spaceship::Client.alias_method(:ask_for_2fa_code, :original_ask_for_2fa_code)
+        Spaceship::Client.remove_method(:original_ask_for_2fa_code)
       end
 
       def retrieve_2fa_code(*_args)
