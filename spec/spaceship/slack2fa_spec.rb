@@ -2,7 +2,7 @@
 
 RSpec.describe Spaceship::Slack2fa do
   it 'has a version number' do
-    expect(Spaceship::Slack2fa::VERSION).not_to be nil
+    expect(Spaceship::Slack2fa::VERSION).not_to be_nil
   end
 
   describe '.enable' do
