@@ -6,7 +6,7 @@ RSpec.describe Spaceship::Slack2fa do
   end
 
   describe '.enable' do
-    subject do
+    subject :ask_for_2fa_code do
       described_class.enable(**options) { client.ask_for_2fa_code }
     end
 
@@ -42,11 +42,11 @@ RSpec.describe Spaceship::Slack2fa do
       end
 
       it 'retrieves 2FA code from Slack messages' do
-        expect(subject).to eq '123456'
+        expect(ask_for_2fa_code).to eq '123456'
       end
 
       it 'posts a comment on the thread' do
-        subject
+        ask_for_2fa_code
         expect(slack).to have_received(:chat_postMessage)
           .with(channel: 'CHANNEL_ID',
                 text: a_string_including('REFERRER'),
@@ -54,7 +54,7 @@ RSpec.describe Spaceship::Slack2fa do
       end
 
       it 'removes temporary method' do
-        subject
+        ask_for_2fa_code
         expect(client).not_to respond_to :original_ask_for_2fa_code
       end
     end
@@ -66,7 +66,7 @@ RSpec.describe Spaceship::Slack2fa do
       end
 
       it 'raises an error' do
-        expect { subject }.to raise_error Slack::Web::Api::Errors::MissingScope
+        expect { ask_for_2fa_code }.to raise_error Slack::Web::Api::Errors::MissingScope
       end
     end
 
@@ -82,7 +82,7 @@ RSpec.describe Spaceship::Slack2fa do
       end
 
       it 'logs an error without raising it' do
-        expect { subject }.to output(/missing scope/).to_stderr
+        expect { ask_for_2fa_code }.to output(/missing scope/).to_stderr
         expect(slack).to have_received(:chat_postMessage)
           .with(channel: 'CHANNEL_ID',
                 text: a_string_including('REFERRER'),
@@ -97,7 +97,7 @@ RSpec.describe Spaceship::Slack2fa do
       end
 
       it 'raises RuntimeError' do
-        expect { subject }.to raise_error Slack::Web::Api::Errors::InvalidAuth
+        expect { ask_for_2fa_code }.to raise_error Slack::Web::Api::Errors::InvalidAuth
       end
     end
   end
