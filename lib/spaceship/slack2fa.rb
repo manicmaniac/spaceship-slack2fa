@@ -64,7 +64,7 @@ module Spaceship
       end
 
       def comment_on_thread_of(message)
-        text = "This 2FA token has been consumed by #{@referrer} using <https://github.com/manicmaniac/spaceship-slack-2fa|spaceship-slack-2fa>."
+        text = "This 2FA token has been consumed by #{@referrer} using <https://github.com/manicmaniac/spaceship-slack2fa|spaceship-slack2fa>."
         @slack.chat_postMessage(channel: @channel_id, text: text, thread_ts: message.ts)
       end
 
