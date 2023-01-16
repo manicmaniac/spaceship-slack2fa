@@ -18,7 +18,7 @@ RSpec.describe Spaceship::Slack2fa do
         user_id: 'U012AB3CDE',
         referrer: 'REFERRER',
         retry_count: retry_count,
-        retry_interval: 0.1
+        retry_interval: 0.01
       }
     end
     let(:retry_count) { 0 }
@@ -61,6 +61,34 @@ RSpec.describe Spaceship::Slack2fa do
       it 'removes temporary method' do
         ask_for_2fa_code
         expect(client).not_to respond_to :original_ask_for_2fa_code
+      end
+    end
+
+    context 'when the first API call returns no code and the second returns a code' do
+      let(:retry_count) { 1 }
+
+      before do
+        json_paths = [
+          '../support/fixtures/conversations.history.empty.json',
+          '../support/fixtures/conversations.history.json'
+        ]
+        messages = json_paths
+                   .map { |path| File.read(File.expand_path(path, __dir__)) }
+                   .map { |text| JSON.parse(text) }
+                   .map { |json| Slack::Messages::Message.new(json) }
+        allow(slack).to receive(:conversations_history)
+          .with(channel: 'CHANNEL_ID')
+          .and_return(*messages)
+        allow(slack).to receive(:chat_postMessage)
+      end
+
+      it 'retrieves 2FA code from Slack messages' do
+        expect(ask_for_2fa_code).to eq '123456'
+      end
+
+      it 'calls API twice' do
+        ask_for_2fa_code
+        expect(slack).to have_received(:conversations_history).with(channel: 'CHANNEL_ID').twice
       end
     end
 
