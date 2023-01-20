@@ -25,6 +25,9 @@ RSpec.describe Spaceship::Slack2fa do
     let(:slack) { instance_double(Slack::Web::Client) }
     let(:log) { StringIO.new }
 
+    # jq '.messages | map(.ts | tonumber) | min | floor' < spec/support/fixtures/conversations.history.json
+    oldest = 1_512_085_950
+
     before do
       Spaceship::Client.define_method(:ask_for_2fa_code) { raise NotImplementedError }
       allow(Slack::Web::Client).to receive(:new)
@@ -34,6 +37,7 @@ RSpec.describe Spaceship::Slack2fa do
       allow(Logger).to receive(:new)
         .with($stderr)
         .and_return logger
+      allow(Time).to receive(:now).and_return Time.at(oldest)
     end
 
     context 'when authenticated' do
@@ -41,7 +45,7 @@ RSpec.describe Spaceship::Slack2fa do
         json_path = File.expand_path('../support/fixtures/conversations.history.json', __dir__)
         json = JSON.parse(File.read(json_path))
         allow(slack).to receive(:conversations_history)
-          .with(channel: 'CHANNEL_ID')
+          .with(channel: 'CHANNEL_ID', oldest: oldest)
           .and_return Slack::Messages::Message.new(json)
         allow(slack).to receive(:chat_postMessage)
       end
@@ -77,7 +81,7 @@ RSpec.describe Spaceship::Slack2fa do
                    .map { |text| JSON.parse(text) }
                    .map { |json| Slack::Messages::Message.new(json) }
         allow(slack).to receive(:conversations_history)
-          .with(channel: 'CHANNEL_ID')
+          .with(channel: 'CHANNEL_ID', oldest: oldest)
           .and_return(*messages)
         allow(slack).to receive(:chat_postMessage)
       end
@@ -88,7 +92,7 @@ RSpec.describe Spaceship::Slack2fa do
 
       it 'calls API twice' do
         ask_for_2fa_code
-        expect(slack).to have_received(:conversations_history).with(channel: 'CHANNEL_ID').twice
+        expect(slack).to have_received(:conversations_history).with(channel: 'CHANNEL_ID', oldest: oldest).twice
       end
     end
 
@@ -108,7 +112,7 @@ RSpec.describe Spaceship::Slack2fa do
         json_path = File.expand_path('../support/fixtures/conversations.history.json', __dir__)
         json = JSON.parse(File.read(json_path))
         allow(slack).to receive(:conversations_history)
-          .with(channel: 'CHANNEL_ID')
+          .with(channel: 'CHANNEL_ID', oldest: oldest)
           .and_return Slack::Messages::Message.new(json)
         allow(slack).to receive(:chat_postMessage)
           .and_raise Slack::Web::Api::Errors::MissingScope.new('missing scope')
