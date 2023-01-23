@@ -3,5 +3,17 @@
   "extends": [
     "config:base"
   ],
-  "platformAutomerge": true
+  "platformAutomerge": true,
+  "rangeStrategy": "update-lockfile",
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": true
+    }
+  ]
 }
