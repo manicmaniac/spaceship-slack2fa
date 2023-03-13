@@ -210,7 +210,7 @@ GEM
     optparse (0.1.1)
     os (1.1.4)
     parallel (1.22.1)
-    parser (3.2.1.0)
+    parser (3.2.1.1)
       ast (~> 2.4.1)
     plist (3.6.0)
     public_suffix (5.0.1)
