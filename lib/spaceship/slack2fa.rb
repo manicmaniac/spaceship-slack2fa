@@ -135,7 +135,7 @@ module Spaceship
       def comment_on_thread_of(message)
         url = 'https://github.com/manicmaniac/spaceship-slack2fa'
         text = "This 6-digit token has been consumed by #{@referrer} using <#{url}|spaceship-slack2fa>."
-        @slack.chat_postMessage(channel: @channel_id, text: text, thread_ts: message.ts)
+        @slack.chat_postMessage(channel: @channel_id, text: text, thread_ts: message.ts, unfurl_links: false)
       rescue Slack::Web::Api::Errors::MissingScope => e
         @logger.warn("#{e.full_message}Make sure your Slack app has #{REQUIRED_SLACK_SCOPES} in the scope.")
       end
