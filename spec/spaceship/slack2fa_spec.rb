@@ -59,7 +59,8 @@ RSpec.describe Spaceship::Slack2fa do
         expect(slack).to have_received(:chat_postMessage)
           .with(channel: 'CHANNEL_ID',
                 text: a_string_including('REFERRER'),
-                thread_ts: '1512104434.000490')
+                thread_ts: '1512104434.000490',
+                unfurl_links: false)
       end
 
       it 'removes temporary method' do
