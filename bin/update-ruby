@@ -18,7 +18,7 @@ with(.jobs[]
 with(.jobs[]
      | select(.strategy.matrix.ruby-version).strategy.matrix.ruby-version;
   . += [strenv(version) | . style="single"]
-  | . = sort_by(match("^\d+\.\d+").string)
+  | . = sort
   | . = reverse
   | . = unique_by(match("^\d+\.\d+").string)
   | . = reverse
