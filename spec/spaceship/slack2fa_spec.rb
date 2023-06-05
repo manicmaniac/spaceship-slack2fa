@@ -97,6 +97,23 @@ RSpec.describe Spaceship::Slack2fa do
       end
     end
 
+    context 'when API calls never return code' do
+      let(:retry_count) { 1 }
+
+      before do
+        json_path = File.expand_path('../support/fixtures/conversations.history.empty.json', __dir__)
+        json = JSON.parse(File.read(json_path))
+        allow(slack).to receive(:conversations_history)
+          .with(channel: 'CHANNEL_ID', oldest: oldest)
+          .and_return Slack::Messages::Message.new(json)
+      end
+
+      it 'calls API exactly twice' do
+        ask_for_2fa_code
+        expect(slack).to have_received(:conversations_history).with(channel: 'CHANNEL_ID', oldest: oldest).twice
+      end
+    end
+
     context 'when channel.history is missing in scope' do
       before do
         allow(slack).to receive(:conversations_history)
