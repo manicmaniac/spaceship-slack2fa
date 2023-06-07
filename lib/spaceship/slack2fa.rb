@@ -58,6 +58,15 @@ module Spaceship
   #     )
   #   end
   module Slack2fa
+    # An exception raised when 2FA code is not found after retries.
+    # Do not retry after this error, otherwise your account will be locked.
+    # See https://github.com/manicmaniac/spaceship-slack2fa/issues/59 for the detail.
+    class VerificationCodeNotFound < StandardError
+      def message
+        '2FA code was sent but not found in Slack. Please make sure your code is successfully sent.'
+      end
+    end
+
     # Applies monkey patch to {https://rubydoc.info/gems/fastlane/Spaceship/Client Spaceship::Client} so that it
     # retrieves 6-digit code from Slack.
     #
@@ -111,9 +120,8 @@ module Spaceship
       end
 
       def retrieve_2fa_code(*_args)
-        timestamp = Time.now.to_i
         with_retrying do
-          response = @slack.conversations_history(channel: @channel_id, oldest: timestamp)
+          response = @slack.conversations_history(channel: @channel_id, oldest: Time.now.to_i)
           message = response.messages.select { |msg| unused_2fa_code?(msg) }.max_by(&:ts)
           code = message&.text
           if code
@@ -121,6 +129,7 @@ module Spaceship
             return code
           end
         end
+        raise VerificationCodeNotFound
       end
 
       private

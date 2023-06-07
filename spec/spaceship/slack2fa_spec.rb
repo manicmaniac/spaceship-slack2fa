@@ -109,8 +109,16 @@ RSpec.describe Spaceship::Slack2fa do
       end
 
       it 'calls API exactly twice' do
-        ask_for_2fa_code
+        begin
+          ask_for_2fa_code
+        rescue Spaceship::Slack2fa::VerificationCodeNotFound
+          # Do nothing
+        end
         expect(slack).to have_received(:conversations_history).with(channel: 'CHANNEL_ID', oldest: oldest).twice
+      end
+
+      it 'raises VerificationCodeNotFound error' do
+        expect { ask_for_2fa_code }.to raise_error Spaceship::Slack2fa::VerificationCodeNotFound
       end
     end
 
