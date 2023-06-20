@@ -6,6 +6,11 @@ AllCops:
   TargetRubyVersion: 2.7
   NewCops: enable
 
+Metrics/AbcSize:
+  Max: 20
+
+Metrics/MethodLength:
+  Max: 20
+
 RSpec/ExampleLength:
-  Enabled: true
   Max: 10
