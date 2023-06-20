@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'optparse'
+require 'spaceship/slack2fa'
+
+options = {
+  user: ENV['FASTLANE_USER'],
+  password: ENV['FASTLANE_PASSWORD'],
+  phone_number: ENV['SPACESHIP_2FA_SMS_DEFAULT_PHONE_NUMBER'],
+}
+parser = OptionParser.new do |opts|
+  opts.banner = "usage: #{opts.program_name} [options]"
+  opts.on('-uUSER_ID', '--user', "AppStore Connect user's email (default: #{options[:user]})")
+  opts.on('-pPASSWORD', '--password', "AppStore Connect user's password (default: #{options[:password]})")
+  opts.on('-nPHONE_NUMBER', '--phone_number', "Phone number to receive 2FA code (default: #{options[:phone_number]})")
+  opts.on('-tSLACK_API_TOKEN', '--slack_api_token', 'Slack API token')
+  opts.on('-cSLACK_CHANNEL_ID', '--slack_channel_id', 'Slack channel ID where the 2FA code is sent')
+  opts.on('-sSLACK_USER_ID', '--slack_user_id', 'Slack user ID who sends 2FA code')
+end
+parser.parse(ARGV, into: options)
+
+Spaceship::Slack2fa.enable(
+  referrer: 'spaceship-slack2fa',
+  slack_api_token: options[:slack_api_token],
+  channel_id: options[:slack_channel_id],
+  user_id: options[:slack_user_id]
+) do
+  ENV['FASTLANE_USER'] = options[:user]
+  ENV['FASTLANE_PASSWORD'] = options[:password]
+  ENV['SPACESHIP_2FA_SMS_DEFAULT_PHONE_NUMBER'] = options[:phone_number]
+  Spaceship::TunesClient.login
+end
