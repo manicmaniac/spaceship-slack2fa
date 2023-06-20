@@ -121,9 +121,10 @@ module Spaceship
       end
 
       def retrieve_2fa_code(*_args)
+        timestamp = Time.now.to_i
         with_retrying do |i|
           @logger.debug("Attempt ##{i}.")
-          response = @slack.conversations_history(channel: @channel_id, oldest: Time.now.to_i)
+          response = @slack.conversations_history(channel: @channel_id, oldest: timestamp)
           @logger.debug("Found #{response.messages.size} messages.")
           message = response.messages.select { |msg| unused_2fa_code?(msg) }.max_by(&:ts)
           @logger.debug("Possible message: #{message}.")
