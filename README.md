@@ -85,3 +85,38 @@ Use API key provided by App Store Connect instead, if possible.
 
 This program does not consider concurrency at all.
 When you run multiple processes of this program and those watches the same Slack channel, some processes may retrieve wrong 2FA code.
+
+## Testing
+
+Run the following command to run test
+
+```sh
+bundle exec rake spec
+```
+
+You can use `bin/login-to-appstore-connect` to do end-to-end testing.
+This script does nothing but login to AppStore Connect.
+
+:warning: Note that your account will be locked out if you request Apple to send 2FA code many times without establishing a session.
+
+```sh
+bin/login-to-appstore-connect \
+  --user 'developer@example.com' \
+  --password 'PASSWORD' \
+  --phone_number '+81 80-XXXX-XXXX' \
+  --slack_api_token 'xoxb-XXXXXXXX' \
+  --slack_channel_id CXXXXXXXX \
+  --slack_user_id UXXXXXXXX
+```
+
+Or you can pass some of the options though environment variables.
+
+```sh
+export FASTLANE_USER=developer@example.com
+export FASTLANE_PASSWORD=PASSWORD
+export SPACESHIP_2FA_SMS_DEFAULT_PHONE_NUMBER='+81 80-XXXX-XXXX'
+
+bin/login-to-appstore-connect -t 'xoxb-XXXXXXXX' -c CXXXXXXXX -s UXXXXXXXX
+```
+
+After the script successfully establish login session, you can see `~/.fastlane/spaceship/*/cookie`, which serializes a cookie of AppStore Connect.
