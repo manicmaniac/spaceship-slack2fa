@@ -5,9 +5,9 @@ require 'optparse'
 require 'spaceship/slack2fa'
 
 options = {
-  user: ENV['FASTLANE_USER'],
-  password: ENV['FASTLANE_PASSWORD'],
-  phone_number: ENV['SPACESHIP_2FA_SMS_DEFAULT_PHONE_NUMBER'],
+  user: ENV.fetch('FASTLANE_USER', nil),
+  password: ENV.fetch('FASTLANE_PASSWORD', nil),
+  phone_number: ENV.fetch('SPACESHIP_2FA_SMS_DEFAULT_PHONE_NUMBER', nil)
 }
 parser = OptionParser.new do |opts|
   opts.banner = "usage: #{opts.program_name} [options]"
