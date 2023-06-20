@@ -85,3 +85,66 @@ Use API key provided by App Store Connect instead, if possible.
 
 This program does not consider concurrency at all.
 When you run multiple processes of this program and those watches the same Slack channel, some processes may retrieve wrong 2FA code.
+
+## Testing
+
+Run the following command to run test
+
+```sh
+bundle exec rake spec
+```
+
+You can use `bin/login-to-appstore-connect` to do end-to-end testing.
+This script does nothing but login to AppStore Connect.
+
+:warning: Note that your account will be locked out if you request Apple to send 2FA code many times without establishing a session.
+
+```sh
+bin/login-to-appstore-connect \
+  --user 'developer@example.com' \
+  --password 'PASSWORD' \
+  --phone_number '+81 80-XXXX-XXXX' \
+  --slack_api_token 'xoxb-XXXXXXXX' \
+  --slack_channel_id CXXXXXXXX \
+  --slack_user_id UXXXXXXXX
+```
+
+Or you can pass some of the options though environment variables.
+
+```sh
+export FASTLANE_USER=developer@example.com
+export FASTLANE_PASSWORD=PASSWORD
+export SPACESHIP_2FA_SMS_DEFAULT_PHONE_NUMBER='+81 80-XXXX-XXXX'
+
+bin/login-to-appstore-connect -t 'xoxb-XXXXXXXX' -c CXXXXXXXX -s UXXXXXXXX
+```
+
+After the script successfully establish login session, you can see `~/.fastlane/spaceship/*/cookie`, which serializes a cookie of AppStore Connect.
+
+## Release
+
+This library is not intended to be published on rubygems.org.
+So the release flow is simple as described below.
+
+### 1. Create a pull request to bump version
+
+```sh
+export VERSION='x.x.x'
+git checkout -b "release/$VERSION"
+ruby -pi -e 'sub(/[0-9.]+/, ENV["VERSION"]) if /VERSION/' lib/spaceship/slack2fa/version.rb
+bundle install
+git commit -am "Bump version to $VERSION"
+gh pr create -fa@me
+gh pr merge -dm --auto
+```
+
+### 2. Publish release
+
+After the pull request is merged, run the following commands.
+
+```sh
+export VERSION='x.x.x'
+git tag -am "$VERSION" "$VERSION"
+git push origin "$VERSION"
+gh release create -t "$VERSION" --generate-notes "$VERSION"
+```
