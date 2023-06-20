@@ -24,7 +24,8 @@ Spaceship::Slack2fa.enable(
   referrer: 'spaceship-slack2fa',
   slack_api_token: options[:slack_api_token],
   channel_id: options[:slack_channel_id],
-  user_id: options[:slack_user_id]
+  user_id: options[:slack_user_id],
+  verbose: true
 ) do
   ENV['FASTLANE_USER'] = options[:user]
   ENV['FASTLANE_PASSWORD'] = options[:password]
