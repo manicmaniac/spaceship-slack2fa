@@ -121,11 +121,15 @@ module Spaceship
       end
 
       def retrieve_2fa_code(*_args)
-        with_retrying do
+        with_retrying do |i|
+          @logger.debug("Attempt ##{i}.")
           response = @slack.conversations_history(channel: @channel_id, oldest: Time.now.to_i)
+          @logger.debug("Found #{response.messages.size} messages.")
           message = response.messages.select { |msg| unused_2fa_code?(msg) }.max_by(&:ts)
+          @logger.debug("Possible message: #{message}.")
           code = message&.text
           if code
+            @logger.debug("Found 2FA code: #{code}.")
             comment_on_thread_of(message)
             return code
           end
@@ -136,8 +140,8 @@ module Spaceship
       private
 
       def with_retrying
-        (@retry_count + 1).times do |_i|
-          yield
+        (@retry_count + 1).times do |i|
+          yield i
           sleep(@retry_interval)
         end
       end
