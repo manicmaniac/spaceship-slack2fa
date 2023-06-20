@@ -107,6 +107,7 @@ module Spaceship
         @retry_count = options.fetch(:retry_count, 3)
         @retry_interval = options.fetch(:retry_interval, 20.0)
         @logger = Logger.new($stderr)
+        @logger.level = (options.fetch(:verbose, false) ? Logger::DEBUG : Logger::WARN)
       end
 
       def enable
