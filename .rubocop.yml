@@ -14,3 +14,7 @@ Metrics/MethodLength:
 
 RSpec/ExampleLength:
   Max: 10
+
+Style/SignalException:
+  Exclude:
+    - Dangerfile
