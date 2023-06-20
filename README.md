@@ -120,3 +120,31 @@ bin/login-to-appstore-connect -t 'xoxb-XXXXXXXX' -c CXXXXXXXX -s UXXXXXXXX
 ```
 
 After the script successfully establish login session, you can see `~/.fastlane/spaceship/*/cookie`, which serializes a cookie of AppStore Connect.
+
+## Release
+
+This library is not intended to be published on rubygems.org.
+So the release flow is simple as described below.
+
+### 1. Create a pull request to bump version
+
+```sh
+export VERSION='x.x.x'
+git checkout -b "release/$VERSION"
+ruby -pi -e 'sub(/[0-9.]+/, ENV["VERSION"]) if /VERSION/' lib/spaceship/slack2fa/version.rb
+bundle install
+git commit -am "Bump version to $VERSION"
+gh pr create -fa@me
+gh pr merge -dm --auto
+```
+
+### 2. Publish release
+
+After the pull request is merged, run the following commands.
+
+```sh
+export VERSION='x.x.x'
+git tag -am "$VERSION" "$VERSION"
+git push origin "$VERSION"
+gh release create -t "$VERSION" --generate-notes "$VERSION"
+```
