@@ -215,7 +215,7 @@ GEM
       ast (~> 2.4.1)
       racc
     plist (3.6.0)
-    public_suffix (5.0.1)
+    public_suffix (5.0.3)
     racc (1.7.1)
     rainbow (3.1.1)
     rake (13.0.6)
