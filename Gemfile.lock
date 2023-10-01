@@ -57,7 +57,7 @@ GEM
       no_proxy_fix
       octokit (~> 5.0)
       terminal-table (>= 1, < 4)
-    danger-rubocop (0.11.0)
+    danger-rubocop (0.12.0)
       danger
       rubocop (~> 1.0)
     declarative (0.0.20)
