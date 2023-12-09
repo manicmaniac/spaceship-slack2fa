@@ -10,7 +10,7 @@ GEM
   specs:
     CFPropertyList (3.0.5)
       rexml
-    addressable (2.8.5)
+    addressable (2.8.6)
       public_suffix (>= 2.0.2, < 6.0)
     artifactory (3.0.15)
     ast (2.4.2)
