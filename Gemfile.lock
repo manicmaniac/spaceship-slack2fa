@@ -319,12 +319,12 @@ PLATFORMS
 
 DEPENDENCIES
   danger (~> 9.0)
-  danger-rubocop
+  danger-rubocop (~> 0.13)
   rake (~> 13.0)
   rspec (~> 3.0)
-  rubocop
-  rubocop-rake
-  rubocop-rspec
+  rubocop (~> 1.66)
+  rubocop-rake (~> 0.6)
+  rubocop-rspec (~> 3.1)
   simplecov (~> 0.22.0)
   spaceship-slack2fa!
   yard (~> 0.9)
