@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    spaceship-slack2fa (0.3.1)
+    spaceship-slack2fa (0.4.0)
       fastlane (~> 2.0)
       slack-ruby-client (~> 1.0)
 
