@@ -94,10 +94,10 @@ module Spaceship
       # @option options [String] :user_id                  Required. The ID of the user posting the message.
       # @option options [String] :referrer                 Required. A +mrkdwn+ text to identify which service consumes
       #                                                    6-digit code, typically the name of your app.
-      # @option options [Boolean] :allow_any_users (false) Optional. If `true`, `spaceship-slack2fa` recognizes only
-      #                                                    messages from the bot user specified in `slack_api_token`,
+      # @option options [Boolean] :allow_any_users (false) Optional. If +true+, +spaceship-slack2fa+ recognizes only
+      #                                                    messages from the bot user specified in +slack_api_token+,
       #                                                    otherwise it treats all messages with 6-digits numbers as
-      #                                                    2FA code. The default is `false`.
+      #                                                    2FA code.
       # @option options [Integer] :retry_count (3)         Optional. The number of retries to try if a message is not
       #                                                    found.
       # @option options [Float] :retry_interval (20)       Optional. The interval between retries in seconds.
