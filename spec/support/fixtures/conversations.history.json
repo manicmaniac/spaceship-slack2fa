@@ -16,6 +16,12 @@
     },
     {
       "type": "message",
+      "user": "U12AB3CDEF",
+      "text": "012345",
+      "ts": "1512105000.000500"
+    },
+    {
+      "type": "message",
       "user": "U012AB3CDE",
       "text": "123456",
       "ts": "1512104434.000490"

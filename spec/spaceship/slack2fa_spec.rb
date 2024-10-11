@@ -16,11 +16,13 @@ RSpec.describe Spaceship::Slack2fa do
         slack_api_token: 'SLACK_API_TOKEN',
         channel_id: 'CHANNEL_ID',
         user_id: 'U012AB3CDE',
+        allow_any_users: allow_any_users,
         referrer: 'REFERRER',
         retry_count: retry_count,
         retry_interval: 0.01
       }
     end
+    let(:allow_any_users) { false }
     let(:retry_count) { 0 }
     let(:slack) { instance_double(Slack::Web::Client) }
     let(:log) { StringIO.new }
@@ -66,6 +68,14 @@ RSpec.describe Spaceship::Slack2fa do
       it 'removes temporary method' do
         ask_for_2fa_code
         expect(client).not_to respond_to :original_ask_for_2fa_code
+      end
+
+      context 'with allow_any_users: true' do
+        let(:allow_any_users) { true }
+
+        it "reads non-bot user's message" do
+          expect(ask_for_2fa_code).to eq '012345'
+        end
       end
     end
 

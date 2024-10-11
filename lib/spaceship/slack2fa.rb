@@ -88,13 +88,19 @@ module Spaceship
     class MonkeyPatch
       REQUIRED_SLACK_SCOPES = %w[channels.history chat.write].freeze
 
-      # @option options [String] :slack_api_token    Required. A bot token for your Slack app.
-      # @option options [String] :channel_id         Required. The ID of the channel where the message will be posted.
-      # @option options [String] :user_id            Required. The ID of the user posting the message.
-      # @option options [String] :referrer           Required. A +mrkdwn+ text to identify which service consumes
-      #                                              6-digit code, typically the name of your app.
-      # @option options [Integer] :retry_count (3)   Optional. The number of retries to try if a message is not found.
-      # @option options [Float] :retry_interval (20) Optional. The interval between retries in seconds.
+      # @option options [String] :slack_api_token          Required. A bot token for your Slack app.
+      # @option options [String] :channel_id               Required. The ID of the channel where the message will be
+      #                                                    posted.
+      # @option options [String] :user_id                  Required. The ID of the user posting the message.
+      # @option options [String] :referrer                 Required. A +mrkdwn+ text to identify which service consumes
+      #                                                    6-digit code, typically the name of your app.
+      # @option options [Boolean] :allow_any_users (false) Optional. If `true`, `spaceship-slack2fa` recognizes only
+      #                                                    messages from the bot user specified in `slack_api_token`,
+      #                                                    otherwise it treats all messages with 6-digits numbers as
+      #                                                    2FA code. The default is `false`.
+      # @option options [Integer] :retry_count (3)         Optional. The number of retries to try if a message is not
+      #                                                    found.
+      # @option options [Float] :retry_interval (20)       Optional. The interval between retries in seconds.
       #
       # @see https://stackoverflow.com/a/44883343/6918498
       #      What is the simplest way to find a slack team ID and a channel ID?
@@ -104,6 +110,7 @@ module Spaceship
         @channel_id = options.fetch(:channel_id)
         @user_id = options.fetch(:user_id)
         @referrer = options.fetch(:referrer)
+        @allow_any_users = options.fetch(:allow_any_users, false)
         @retry_count = options.fetch(:retry_count, 3)
         @retry_interval = options.fetch(:retry_interval, 20.0)
         @logger = Logger.new($stderr)
@@ -157,7 +164,7 @@ module Spaceship
 
       def unused_2fa_code?(message)
         message.type == 'message' &&
-          message.user == @user_id &&
+          (@allow_any_users || message.user == @user_id) &&
           message.fetch('reply_count', 0).zero? &&
           message.fetch('reactions', []).empty? &&
           message.fetch('text', '') =~ /^\d{6}$/
