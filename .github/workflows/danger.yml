@@ -1,0 +1,31 @@
+name: danger
+on:
+  - pull_request
+  - pull_request_target
+jobs:
+  danger:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      statuses: write
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.base.sha }}
+        path: default
+    - uses: actions/checkout@v4
+      with:
+        ref: refs/pull/${{ github.event.pull_request.number }}/merge
+        path: topic
+        set-safe-directory: false
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.4'
+        bundler-cache: true
+        working-directory: default
+    - run: bundle exec danger --dangerfile=../default/Dangerfile
+      working-directory: topic
+      env:
+        BUNDLE_GEMFILE: ../default/Gemfile
+        DANGER_DO_NOT_POST_INVALID_DANGERFILE_ERROR: ''
+        DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
