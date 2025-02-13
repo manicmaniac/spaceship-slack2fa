@@ -5,6 +5,7 @@ require 'json'
 require 'open-uri'
 require 'slack'
 require 'spaceship'
+require_relative 'slack2fa/verification_code_not_found'
 require_relative 'slack2fa/version'
 
 module Spaceship
@@ -58,15 +59,6 @@ module Spaceship
   #     )
   #   end
   module Slack2fa
-    # An exception raised when 2FA code is not found after retries.
-    # Do not retry after this error, otherwise your account will be locked.
-    # See https://github.com/manicmaniac/spaceship-slack2fa/issues/59 for the detail.
-    class VerificationCodeNotFound < StandardError
-      def message
-        '2FA code was sent but not found in Slack. Please make sure your code is successfully sent.'
-      end
-    end
-
     # Applies monkey patch to {https://rubydoc.info/gems/fastlane/Spaceship/Client Spaceship::Client} so that it
     # retrieves 6-digit code from Slack.
     #

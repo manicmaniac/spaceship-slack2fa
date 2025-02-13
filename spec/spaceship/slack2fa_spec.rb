@@ -19,13 +19,15 @@ RSpec.describe Spaceship::Slack2fa do
         allow_any_users: allow_any_users,
         referrer: 'REFERRER',
         retry_count: retry_count,
-        retry_interval: 0.01
+        retry_interval: 0.01,
+        verbose: verbose
       }
     end
     let(:allow_any_users) { false }
     let(:retry_count) { 0 }
     let(:slack) { instance_double(Slack::Web::Client) }
     let(:log) { StringIO.new }
+    let(:verbose) { false }
 
     # jq '.messages | map(.ts | tonumber) | min | floor' < spec/support/fixtures/conversations.history.json
     oldest = 1_512_085_950
@@ -75,6 +77,15 @@ RSpec.describe Spaceship::Slack2fa do
 
         it "reads non-bot user's message" do
           expect(ask_for_2fa_code).to eq '012345'
+        end
+      end
+
+      context 'with verbose: true' do
+        let(:verbose) { true }
+
+        it 'logs debug messages' do
+          ask_for_2fa_code
+          expect(log.string).to include 'Attempt #0.'
         end
       end
     end
