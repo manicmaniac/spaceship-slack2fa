@@ -5,6 +5,7 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in spaceship-slack2fa.gemspec
 gemspec
 
+gem 'abbrev' if RUBY_VERSION.to_f >= 3.4
 gem 'danger', '~> 9.0', require: false
 gem 'danger-rubocop', '~> 0.13', require: false
 gem 'rake', '~> 13.0'
