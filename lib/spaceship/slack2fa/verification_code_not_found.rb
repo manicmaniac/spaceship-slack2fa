@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Spaceship
   module Slack2fa
     # An exception raised when 2FA code is not found after retries.
