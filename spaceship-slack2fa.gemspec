@@ -18,6 +18,6 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'fastlane', '~> 2.0'
-  spec.add_dependency 'logger', '>= 1.4', '< 2.0'
+  spec.add_dependency 'logger', '~> 1.4'
   spec.add_dependency 'slack-ruby-client', '~> 1.0'
 end
