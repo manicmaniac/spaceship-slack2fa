@@ -19,5 +19,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'fastlane', '~> 2.0'
   spec.add_dependency 'logger', '~> 1.4'
-  spec.add_dependency 'slack-ruby-client', '~> 1.0'
+  spec.add_dependency 'slack-ruby-client', '~> 3.0'
 end
